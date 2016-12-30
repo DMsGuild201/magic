@@ -133,7 +133,8 @@ func (g gatherer) GetCards(set *Set) ([]*Card, error) {
 		}
 
 		cards = append(cards, &Card{
-			URL: u.String(),
+			Names: make(map[string]string),
+			URL:   u.String(),
 		})
 	})
 
@@ -152,29 +153,24 @@ func (g gatherer) ScrapeCard(c *Card) error {
 		return err
 	}
 
-	u, err := url.Parse(c.URL)
-	if err != nil {
-		return err
-	}
+	c.ID = getCardID(c.URL)
+	c.CardNumber = getCardNumber(doc)
+	c.Names["en"] = getCardName(doc)
+	c.Set = getCardSet(doc)
 
-	c.ID = u.Query().Get("multiverseid")
-	// c.CardNumber
-	c.CardNumber = strings.TrimSpace(doc.Find("#ctl00_ctl00_ctl00_MainContent_SubContent_SubContent_numberRow .value").Text())
-	// c.Names["en"] = doc.Find("#ctl00_ctl00_ctl00_MainContent_SubContent_SubContent_nameRow .value").Text()
-	c.Set = strings.TrimSpace(doc.Find("#ctl00_ctl00_ctl00_MainContent_SubContent_SubContent_currentSetSymbol a").Text())
 	// c.Mana
 	// c.Color = doc.Find("")
-	c.Type = strings.TrimSpace(doc.Find("#ctl00_ctl00_ctl00_MainContent_SubContent_SubContent_typeRow .value").Text())
-	c.Rarity = strings.TrimSpace(doc.Find("#ctl00_ctl00_ctl00_MainContent_SubContent_SubContent_rarityRow .value").Text())
-	c.ConvertedManageCost, _ = strconv.Atoi(strings.TrimSpace(doc.Find("#ctl00_ctl00_ctl00_MainContent_SubContent_SubContent_cmcRow .value").Text()))
-	c.Power, _ = strconv.Atoi(doc.Find("").Text())
-	c.Toughness, _ = strconv.Atoi(doc.Find("").Text())
-	c.Loyality, _ = strconv.Atoi(doc.Find("#ctl00_ctl00_ctl00_MainContent_SubContent_SubContent_ptRow .value").Text())
+	c.Type = getCardType(doc)
+	c.Rarity = getCardRarity(doc)
+	c.ConvertedManageCost = getCardConvertedManaCost(doc)
+	c.Power = getCardPower(doc)
+	c.Toughness = getCardToughness(doc)
+	c.Loyality = getCardLoyality(doc)
 
 	// c.AbilityText
-	c.FlavorText = strings.TrimSpace(doc.Find("#ctl00_ctl00_ctl00_MainContent_SubContent_SubContent_FlavorText").Text())
-	c.Artist = strings.TrimSpace(doc.Find("#ctl00_ctl00_ctl00_MainContent_SubContent_SubContent_ArtistCredit").Text())
-	// c.Rulings
+	c.FlavorText = getCardFlavorText(doc)
+	c.Artist = getCardArtist(doc)
+	c.Rulings = getCardRulings(doc)
 
 	// ID
 	// URL
@@ -200,4 +196,81 @@ func (g gatherer) ScrapeCard(c *Card) error {
 	// Backside
 
 	return nil
+}
+
+func getCardID(cu string) string {
+	u, err := url.Parse(cu)
+	if err != nil {
+		log.Println(err)
+
+		return ""
+	}
+
+	return u.Query().Get("multiverseid")
+}
+
+func getCardNumber(doc *goquery.Document) string {
+	return strings.TrimSpace(doc.Find("#ctl00_ctl00_ctl00_MainContent_SubContent_SubContent_numberRow .value").Text())
+}
+
+func getCardName(doc *goquery.Document) string {
+	return strings.TrimSpace(doc.Find("#ctl00_ctl00_ctl00_MainContent_SubContent_SubContent_nameRow .value").Text())
+}
+
+func getCardSet(doc *goquery.Document) string {
+	return strings.TrimSpace(doc.Find("#ctl00_ctl00_ctl00_MainContent_SubContent_SubContent_currentSetSymbol a").Text())
+}
+
+func getCardType(doc *goquery.Document) string {
+	return strings.TrimSpace(doc.Find("#ctl00_ctl00_ctl00_MainContent_SubContent_SubContent_typeRow .value").Text())
+}
+
+func getCardRarity(doc *goquery.Document) string {
+	return strings.TrimSpace(doc.Find("#ctl00_ctl00_ctl00_MainContent_SubContent_SubContent_rarityRow .value").Text())
+}
+
+func getCardConvertedManaCost(doc *goquery.Document) int {
+	val, _ := strconv.Atoi(strings.TrimSpace(doc.Find("#ctl00_ctl00_ctl00_MainContent_SubContent_SubContent_cmcRow .value").Text()))
+	return val
+}
+
+func getCardPower(doc *goquery.Document) int {
+	parts := strings.Split(strings.TrimSpace(doc.Find("#ctl00_ctl00_ctl00_MainContent_SubContent_SubContent_ptRow .value").Text()), "/")
+	if len(parts) != 2 {
+		return 0
+	}
+
+	val, _ := strconv.Atoi(strings.TrimSpace(parts[0]))
+	return val
+}
+
+func getCardToughness(doc *goquery.Document) int {
+	parts := strings.Split(strings.TrimSpace(doc.Find("#ctl00_ctl00_ctl00_MainContent_SubContent_SubContent_ptRow .value").Text()), "/")
+	if len(parts) != 2 {
+		return 0
+	}
+
+	val, _ := strconv.Atoi(strings.TrimSpace(parts[1]))
+	return val
+}
+
+func getCardLoyality(doc *goquery.Document) int {
+	val, _ := strconv.Atoi(doc.Find("#ctl00_ctl00_ctl00_MainContent_SubContent_SubContent_ptRow .value").Text())
+	return val
+}
+
+func getCardFlavorText(doc *goquery.Document) string {
+	return strings.TrimSpace(doc.Find("#ctl00_ctl00_ctl00_MainContent_SubContent_SubContent_FlavorText").Text())
+}
+
+func getCardArtist(doc *goquery.Document) string {
+	return strings.TrimSpace(doc.Find("#ctl00_ctl00_ctl00_MainContent_SubContent_SubContent_ArtistCredit").Text())
+}
+
+func getCardRulings(doc *goquery.Document) []string {
+	var rules []string
+	doc.Find(".rulingsText").Each(func(i int, s *goquery.Selection) {
+		rules = append(rules, strings.TrimSpace(s.Text()))
+	})
+	return rules
 }
