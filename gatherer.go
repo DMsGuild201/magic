@@ -4,7 +4,10 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"net/http/cookiejar"
 	"net/url"
+	"strconv"
+	"strings"
 
 	"github.com/PuerkitoBio/goquery"
 )
@@ -16,7 +19,7 @@ var (
 type GathererService interface {
 	SetList() ([]*Set, error)
 	GetCards(*Set) ([]*Card, error)
-	ScrapeCard(string) (*Card, error)
+	ScrapeCard(*Card) error
 }
 
 type gatherer struct {
@@ -24,8 +27,27 @@ type gatherer struct {
 }
 
 func NewGatherer() gatherer {
+	jar, _ := cookiejar.New(nil)
+
+	// we need to set the client
+	// to allow us to scrape without limits
+	// 11=7 is the specific variable
+	var cookies []*http.Cookie
+	cookie := &http.Cookie{
+		Name:   "CardDatabaseSettings",
+		Value:  "0=1&1=28&2=0&14=1&3=13&4=0&5=1&6=15&7=0&8=1&9=1&10=19&11=7&12=8&15=1&16=0&13=",
+		Path:   "/",
+		Domain: "gatherer.wizards.com",
+	}
+	cookies = append(cookies, cookie)
+
+	u, _ := url.Parse("http://gatherer.wizards.com")
+	jar.SetCookies(u, cookies)
+
 	return gatherer{
-		Client: &http.Client{},
+		Client: &http.Client{
+			Jar: jar,
+		},
 	}
 }
 
@@ -118,6 +140,64 @@ func (g gatherer) GetCards(set *Set) ([]*Card, error) {
 	return cards, nil
 }
 
-func (g gatherer) ScrapeCard(ep string) (*Card, error) {
-	return nil, nil
+func (g gatherer) ScrapeCard(c *Card) error {
+	rsp, err := g.Get(c.URL)
+	if err != nil {
+		return err
+	}
+	defer rsp.Body.Close()
+
+	doc, err := goquery.NewDocumentFromReader(rsp.Body)
+	if err != nil {
+		return err
+	}
+
+	u, err := url.Parse(c.URL)
+	if err != nil {
+		return err
+	}
+
+	c.ID = u.Query().Get("multiverseid")
+	// c.CardNumber
+	c.CardNumber = strings.TrimSpace(doc.Find("#ctl00_ctl00_ctl00_MainContent_SubContent_SubContent_numberRow .value").Text())
+	// c.Names["en"] = doc.Find("#ctl00_ctl00_ctl00_MainContent_SubContent_SubContent_nameRow .value").Text()
+	c.Set = strings.TrimSpace(doc.Find("#ctl00_ctl00_ctl00_MainContent_SubContent_SubContent_currentSetSymbol a").Text())
+	// c.Mana
+	// c.Color = doc.Find("")
+	c.Type = strings.TrimSpace(doc.Find("#ctl00_ctl00_ctl00_MainContent_SubContent_SubContent_typeRow .value").Text())
+	c.Rarity = strings.TrimSpace(doc.Find("#ctl00_ctl00_ctl00_MainContent_SubContent_SubContent_rarityRow .value").Text())
+	c.ConvertedManageCost, _ = strconv.Atoi(strings.TrimSpace(doc.Find("#ctl00_ctl00_ctl00_MainContent_SubContent_SubContent_cmcRow .value").Text()))
+	c.Power, _ = strconv.Atoi(doc.Find("").Text())
+	c.Toughness, _ = strconv.Atoi(doc.Find("").Text())
+	c.Loyality, _ = strconv.Atoi(doc.Find("#ctl00_ctl00_ctl00_MainContent_SubContent_SubContent_ptRow .value").Text())
+
+	// c.AbilityText
+	c.FlavorText = strings.TrimSpace(doc.Find("#ctl00_ctl00_ctl00_MainContent_SubContent_SubContent_FlavorText").Text())
+	c.Artist = strings.TrimSpace(doc.Find("#ctl00_ctl00_ctl00_MainContent_SubContent_SubContent_ArtistCredit").Text())
+	// c.Rulings
+
+	// ID
+	// URL
+	//
+	// CardNumber
+	// Names
+	// Set
+	// Mana
+	// Color
+	// Type
+	// Rarity
+	// ConvertedManaCost
+	//
+	// Power
+	// Toughness
+	// Loyality
+	//
+	// AbilityText
+	// FlavorText
+	// Artist
+	// Ruling
+	//
+	// Backside
+
+	return nil
 }

@@ -18,17 +18,38 @@ func main() {
 	for _, s := range sets {
 		log.Println(s.Name, s.URL)
 
-		cards, err = g.GetCards(s)
-		if err != nil {
+		if cards, err = g.GetCards(s); err != nil {
 			log.Println(err)
 			continue
 		}
 
 		for _, card := range cards {
-			log.Println(card.URL)
+			if err = g.ScrapeCard(card); err != nil {
+				log.Println(err)
+				continue
+			}
+
+			log.Printf("%+v", card)
 		}
 
-		log.Println("found", len(cards))
+		break
+	}
+
+	sstor, err := JsonStorage("sets")
+	if err != nil {
+		panic(err)
+	}
+
+	if err := sstor.Save(sets); err != nil {
+		panic(err)
+	}
+	cstor, err := JsonStorage("cards")
+	if err != nil {
+		panic(err)
+	}
+
+	if err := cstor.Save(cards); err != nil {
+		panic(err)
 	}
 	return
 }

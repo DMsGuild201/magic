@@ -15,7 +15,7 @@ type Card struct {
 	Mana       string            `json:"mana"`
 	Color      string            `json:"color"`
 	Type       string            `json:"type"`
-	Rarity     Rarity            `json:"rarity"`
+	Rarity     string            `json:"rarity"`
 
 	// total that the card costs
 	ConvertedManageCost int `json:"converted_mana_cost"`
@@ -24,10 +24,10 @@ type Card struct {
 	Toughness int `json:"toughness"`
 	Loyality  int `json:"loyality"`
 
-	AbilityText string `json:"ability_text"`
-	FlavorText  string `json:"flavor_text"`
-	Artist      string `json:"artist"`
-	Ruling      string `json:"ruling"`
+	AbilityText string   `json:"ability_text"`
+	FlavorText  string   `json:"flavor_text"`
+	Artist      string   `json:"artist"`
+	Rulings     []string `json:"rulings"`
 
 	// some cards have a backside
 	// we need to represent this
