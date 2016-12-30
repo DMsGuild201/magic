@@ -157,8 +157,7 @@ func (g gatherer) ScrapeCard(c *Card) error {
 	c.CardNumber = getCardNumber(doc)
 	c.Names["en"] = getCardName(doc)
 	c.Set = getCardSet(doc)
-
-	// c.Mana
+	c.Mana = getCardMana(doc)
 	// c.Color = doc.Find("")
 	c.Type = getCardType(doc)
 	c.Rarity = getCardRarity(doc)
@@ -167,33 +166,10 @@ func (g gatherer) ScrapeCard(c *Card) error {
 	c.Toughness = getCardToughness(doc)
 	c.Loyality = getCardLoyality(doc)
 
-	// c.AbilityText
+	c.AbilityTexts = getCardAbilityText(doc)
 	c.FlavorText = getCardFlavorText(doc)
 	c.Artist = getCardArtist(doc)
 	c.Rulings = getCardRulings(doc)
-
-	// ID
-	// URL
-	//
-	// CardNumber
-	// Names
-	// Set
-	// Mana
-	// Color
-	// Type
-	// Rarity
-	// ConvertedManaCost
-	//
-	// Power
-	// Toughness
-	// Loyality
-	//
-	// AbilityText
-	// FlavorText
-	// Artist
-	// Ruling
-	//
-	// Backside
 
 	return nil
 }
@@ -273,4 +249,30 @@ func getCardRulings(doc *goquery.Document) []string {
 		rules = append(rules, strings.TrimSpace(s.Text()))
 	})
 	return rules
+}
+
+func getCardMana(doc *goquery.Document) string {
+	var mana []string
+	doc.Find("#ctl00_ctl00_ctl00_MainContent_SubContent_SubContent_manaRow .value img").Each(func(i int, s *goquery.Selection) {
+		src, ok := s.Attr("src")
+		if ok {
+			u, err := url.Parse(src)
+			if err != nil {
+				log.Println(err)
+			}
+
+			m := u.Query().Get("name")
+			mana = append(mana, fmt.Sprintf("{%s}", m))
+		}
+	})
+
+	return strings.Join(mana, "")
+}
+
+func getCardAbilityText(doc *goquery.Document) []string {
+	var texts []string
+	doc.Find("#ctl00_ctl00_ctl00_MainContent_SubContent_SubContent_textRow .value .cardtextbox").Each(func(i int, s *goquery.Selection) {
+		texts = append(texts, s.Text())
+	})
+	return texts
 }

@@ -24,13 +24,22 @@ type Card struct {
 	Toughness int `json:"toughness"`
 	Loyality  int `json:"loyality"`
 
-	AbilityText string   `json:"ability_text"`
-	FlavorText  string   `json:"flavor_text"`
-	Artist      string   `json:"artist"`
-	Rulings     []string `json:"rulings"`
+	AbilityTexts []string `json:"ability_texts"`
+	FlavorText   string   `json:"flavor_text"`
+	Artist       string   `json:"artist"`
+	Rulings      []string `json:"rulings"`
 
 	// some cards have a backside
 	// we need to represent this
 	// see Westvale Abbey
 	Backside *Card `json:"backside,omitempty"`
+}
+
+func (c Card) String() string {
+	name, ok := c.Names["en"]
+	if !ok {
+		return "unknown name"
+	}
+
+	return name
 }

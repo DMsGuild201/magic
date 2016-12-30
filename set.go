@@ -7,3 +7,7 @@ type Set struct {
 
 	Cards []*Card `json:"-"`
 }
+
+func (s Set) String() string {
+	return s.Name
+}

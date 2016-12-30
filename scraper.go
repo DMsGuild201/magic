@@ -16,7 +16,7 @@ func main() {
 
 	log.Println("found", len(sets))
 	for _, s := range sets {
-		log.Println(s.Name, s.URL)
+		log.Println("processing set", s)
 
 		if cards, err = g.GetCards(s); err != nil {
 			log.Println(err)
@@ -29,10 +29,8 @@ func main() {
 				continue
 			}
 
-			log.Printf("%+v", card)
+			log.Println("scraped", card)
 		}
-
-		break
 	}
 
 	sstor, err := JsonStorage("sets")
