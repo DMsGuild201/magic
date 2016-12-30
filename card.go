@@ -3,34 +3,34 @@ package main
 type Card struct {
 	// this is the multiverseid
 	// taken from Gatherer
-	ID  string
-	URL string
+	ID  string `json:"id"`
+	URL string `json:"gatherer_url"`
 
 	// this is a unique string for
 	// the card in a set
 	// edge cases with 27a as number
-	CardNumber string
-	Name       map[string]string
-	Set        string
-	Mana       string
-	Color      string
-	Type       string
-	Rarity     Rarity
+	CardNumber string            `json:"card_number"`
+	Names      map[string]string `json:"names"`
+	Set        string            `json:"set"`
+	Mana       string            `json:"mana"`
+	Color      string            `json:"color"`
+	Type       string            `json:"type"`
+	Rarity     Rarity            `json:"rarity"`
 
 	// total that the card costs
-	ConvertedManageCost int
+	ConvertedManageCost int `json:"converted_mana_cost"`
 
-	Power     int
-	Toughness int
-	Loyality  int
+	Power     int `json:"power"`
+	Toughness int `json:"toughness"`
+	Loyality  int `json:"loyality"`
 
-	AbilityText string
-	FlavorText  string
-	Artist      string
-	Ruling      string
+	AbilityText string `json:"ability_text"`
+	FlavorText  string `json:"flavor_text"`
+	Artist      string `json:"artist"`
+	Ruling      string `json:"ruling"`
 
 	// some cards have a backside
 	// we need to represent this
 	// see Westvale Abbey
-	Backside *Card
+	Backside *Card `json:"backside,omitempty"`
 }

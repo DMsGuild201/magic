@@ -1,9 +1,9 @@
 package main
 
 type Set struct {
-	Name      string
-	URL       string
-	CardCount int
+	Name      string `json:"name"`
+	URL       string `json:"gatherer_url"`
+	CardCount int    `json:"-"`
 
-	Cards []*Card
+	Cards []*Card `json:"-"`
 }
