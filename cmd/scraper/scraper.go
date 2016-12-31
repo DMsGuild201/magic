@@ -1,14 +1,18 @@
 package main
 
-import "log"
+import (
+	"log"
+	"magic"
+	"magic/gatherer"
+)
 
 func main() {
 	var (
-		sets  []*Set
-		cards []*Card
+		sets  []*magic.Set
+		cards []*magic.Card
 	)
 
-	g := NewGatherer()
+	g := gatherer.New()
 	sets, err := g.ScrapeSets()
 	if err != nil {
 		panic(err)
@@ -29,24 +33,30 @@ func main() {
 				continue
 			}
 
-			log.Println("scraped", card)
+			log.Println("scraped", card, card.URL)
+
+			// append the card to the set too
+			s.Cards = append(s.Cards, card)
 		}
 	}
 
-	sstor, err := JsonStorage("sets")
+	// save the set data
+	setStore, err := JsonStorage("sets")
 	if err != nil {
 		panic(err)
 	}
 
-	if err := sstor.Save(sets); err != nil {
+	if err := setStore.Save(sets); err != nil {
 		panic(err)
 	}
-	cstor, err := JsonStorage("cards")
+
+	// save the card data
+	cardStore, err := JsonStorage("cards")
 	if err != nil {
 		panic(err)
 	}
 
-	if err := cstor.Save(cards); err != nil {
+	if err := cardStore.Save(cards); err != nil {
 		panic(err)
 	}
 	return

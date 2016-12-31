@@ -1,8 +1,9 @@
-package main
+package gatherer
 
 import (
 	"fmt"
 	"log"
+	"magic"
 	"net/http"
 	"net/http/cookiejar"
 	"net/url"
@@ -16,17 +17,17 @@ var (
 	api = "http://gatherer.wizards.com/"
 )
 
-type GathererService interface {
-	SetList() ([]*Set, error)
-	GetCards(*Set) ([]*Card, error)
-	ScrapeCard(*Card) error
+type Service interface {
+	SetList() ([]*magic.Set, error)
+	GetCards(*magic.Set) ([]*magic.Card, error)
+	ScrapeCard(*magic.Card) error
 }
 
 type gatherer struct {
 	*http.Client
 }
 
-func NewGatherer() gatherer {
+func New() gatherer {
 	jar, _ := cookiejar.New(nil)
 
 	// we need to set the client
@@ -51,7 +52,7 @@ func NewGatherer() gatherer {
 	}
 }
 
-func (g gatherer) ScrapeSets() ([]*Set, error) {
+func (g gatherer) ScrapeSets() ([]*magic.Set, error) {
 	rsp, err := g.Get(fmt.Sprintf("%sPages/Default.aspx", api))
 	if err != nil {
 		return nil, err
@@ -63,7 +64,7 @@ func (g gatherer) ScrapeSets() ([]*Set, error) {
 		return nil, err
 	}
 
-	var sets []*Set
+	var sets []*magic.Set
 	doc.Find("#ctl00_ctl00_MainContent_Content_SearchControls_setAddText option").Each(func(i int, s *goquery.Selection) {
 		name, ok := s.Attr("value")
 		if !ok {
@@ -89,7 +90,7 @@ func (g gatherer) ScrapeSets() ([]*Set, error) {
 		q.Set("set", fmt.Sprintf(`["%s"]`, name))
 		ep.RawQuery = q.Encode()
 
-		set := Set{
+		set := magic.Set{
 			Name: name,
 			URL:  ep.String(),
 		}
@@ -100,7 +101,7 @@ func (g gatherer) ScrapeSets() ([]*Set, error) {
 	return sets, nil
 }
 
-func (g gatherer) GetCards(set *Set) ([]*Card, error) {
+func (g gatherer) GetCards(set *magic.Set) ([]*magic.Card, error) {
 	rsp, err := g.Get(set.URL)
 	if err != nil {
 		return nil, err
@@ -112,7 +113,7 @@ func (g gatherer) GetCards(set *Set) ([]*Card, error) {
 		return nil, err
 	}
 
-	var cards []*Card
+	var cards []*magic.Card
 	doc.Find(".middleCol a").Each(func(i int, s *goquery.Selection) {
 		href, ok := s.Attr("href")
 		if !ok {
@@ -132,7 +133,7 @@ func (g gatherer) GetCards(set *Set) ([]*Card, error) {
 			return
 		}
 
-		cards = append(cards, &Card{
+		cards = append(cards, &magic.Card{
 			Names: make(map[string]string),
 			URL:   u.String(),
 		})
@@ -141,7 +142,7 @@ func (g gatherer) GetCards(set *Set) ([]*Card, error) {
 	return cards, nil
 }
 
-func (g gatherer) ScrapeCard(c *Card) error {
+func (g gatherer) ScrapeCard(c *magic.Card) error {
 	rsp, err := g.Get(c.URL)
 	if err != nil {
 		return err

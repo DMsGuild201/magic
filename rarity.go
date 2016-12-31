@@ -1,4 +1,4 @@
-package main
+package magic
 
 type Rarity rune
 

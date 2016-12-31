@@ -1,4 +1,4 @@
-package main
+package magic
 
 type Set struct {
 	Name      string `json:"name"`
