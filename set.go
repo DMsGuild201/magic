@@ -5,7 +5,7 @@ type Set struct {
 	URL       string `json:"gatherer_url"`
 	CardCount int    `json:"-"`
 
-	Cards []*Card `json:"-"`
+	Cards []*Card `json:"cards"`
 }
 
 func (s Set) String() string {

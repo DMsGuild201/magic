@@ -19,6 +19,7 @@ func main() {
 	}
 
 	log.Println("found", len(sets))
+	counter := 5
 	for _, s := range sets {
 		log.Println("processing set", s)
 
@@ -37,6 +38,11 @@ func main() {
 
 			// append the card to the set too
 			s.Cards = append(s.Cards, card)
+		}
+
+		counter--
+		if counter == 0 {
+			break
 		}
 	}
 
