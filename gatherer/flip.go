@@ -121,7 +121,8 @@ func (f flip) getFrontCardToughness(doc *goquery.Document) int {
 }
 
 func (f flip) getFrontCardLoyality(doc *goquery.Document) int {
-	return 0
+	val, _ := strconv.Atoi(doc.Find("#ctl00_ctl00_ctl00_MainContent_SubContent_SubContent_ctl02_ptRow .value").Text())
+	return val
 }
 
 func (f flip) getFrontCardAbilityText(doc *goquery.Document) []string {
