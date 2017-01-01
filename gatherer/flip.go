@@ -100,13 +100,24 @@ func (f flip) getFrontCardConvertedManaCost(doc *goquery.Document) int {
 	return val
 }
 
-// TODO(Dan): are there any flip cards that have a power/toughness
 func (f flip) getFrontCardPower(doc *goquery.Document) int {
-	return 0
+	parts := strings.Split(strings.TrimSpace(doc.Find("#ctl00_ctl00_ctl00_MainContent_SubContent_SubContent_ctl02_ptRow .value").Text()), "/")
+	if len(parts) != 2 {
+		return 0
+	}
+
+	val, _ := strconv.Atoi(strings.TrimSpace(parts[0]))
+	return val
 }
 
 func (f flip) getFrontCardToughness(doc *goquery.Document) int {
-	return 0
+	parts := strings.Split(strings.TrimSpace(doc.Find("#ctl00_ctl00_ctl00_MainContent_SubContent_SubContent_ctl02_ptRow .value").Text()), "/")
+	if len(parts) != 2 {
+		return 0
+	}
+
+	val, _ := strconv.Atoi(strings.TrimSpace(parts[1]))
+	return val
 }
 
 func (f flip) getFrontCardLoyality(doc *goquery.Document) int {
@@ -170,11 +181,23 @@ func (f flip) getBackCardConvertedManaCost(doc *goquery.Document) int {
 }
 
 func (f flip) getBackCardPower(doc *goquery.Document) int {
-	return 0
+	parts := strings.Split(strings.TrimSpace(doc.Find("#ctl00_ctl00_ctl00_MainContent_SubContent_SubContent_ctl03_ptRow .value").Text()), "/")
+	if len(parts) != 2 {
+		return 0
+	}
+
+	val, _ := strconv.Atoi(strings.TrimSpace(parts[0]))
+	return val
 }
 
 func (f flip) getBackCardToughness(doc *goquery.Document) int {
-	return 0
+	parts := strings.Split(strings.TrimSpace(doc.Find("#ctl00_ctl00_ctl00_MainContent_SubContent_SubContent_ctl03_ptRow .value").Text()), "/")
+	if len(parts) != 2 {
+		return 0
+	}
+
+	val, _ := strconv.Atoi(strings.TrimSpace(parts[1]))
+	return val
 }
 
 func (f flip) getBackCardLoyality(doc *goquery.Document) int {
