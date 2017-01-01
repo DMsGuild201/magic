@@ -4,6 +4,17 @@ build an open source mgto gather data scraper. It needs to support multiple data
 ### Project status
 The project is currently in development. This is NOT a stable API. We're aiming for a stable interface that everyone can follow, and we can continuely patch as MTGO changes.
 
+Right now we're saving the data in JSON format (sets and cards).
+
+TODOO
+* Image extraction and saving
+-- Support multiple backends (S3, filesystem, etc..)
+* Unit test the existing card types
+* Pull translations of the cards
+* Process card descriptions to support symbols (tap, mana cost etc..)
+* Double check we have an interface for ever interaction.
+
+
 ### Magic card edge cases (so far)
 Reaper King
 http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=159408
