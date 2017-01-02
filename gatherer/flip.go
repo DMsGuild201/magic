@@ -36,6 +36,7 @@ func (f flip) Parse(doc *goquery.Document, c *magic.Card) error {
 		ID:         c.ID,
 		URL:        c.URL,
 		CardNumber: f.getBackCardNumber(doc),
+		Image:      f.getBackCardImage(doc),
 		Names: map[string]string{
 			"en": f.getBackCardName(doc),
 		},
@@ -85,6 +86,27 @@ func (f flip) getFrontCardMana(doc *goquery.Document) string {
 	})
 
 	return strings.Join(mana, "")
+}
+
+func (f flip) getFrontCardImage(doc *goquery.Document) string {
+	src, ok := doc.Find("#ctl00_ctl00_ctl00_MainContent_SubContent_SubContent_ctl02_Td1 img").Attr("src")
+	if !ok {
+		return ""
+	}
+
+	ep, err := url.Parse(doc.Url.String())
+	if err != nil {
+		log.Println(err)
+		return ""
+	}
+
+	ep, err = ep.Parse(src)
+	if err != nil {
+		log.Println(err)
+		return ""
+	}
+
+	return ep.String()
 }
 
 func (f flip) getFrontCardType(doc *goquery.Document) string {
@@ -162,6 +184,27 @@ func (f flip) getBackCardMana(doc *goquery.Document) string {
 
 func (f flip) getBackCardNumber(doc *goquery.Document) string {
 	return strings.TrimSpace(doc.Find("#ctl00_ctl00_ctl00_MainContent_SubContent_SubContent_ctl04_numberRow .value").Text())
+}
+
+func (f flip) getBackCardImage(doc *goquery.Document) string {
+	src, ok := doc.Find("#ctl00_ctl00_ctl00_MainContent_SubContent_SubContent_ctl03_Td1 img").Attr("src")
+	if !ok {
+		return ""
+	}
+
+	ep, err := url.Parse(doc.Url.String())
+	if err != nil {
+		log.Println(err)
+		return ""
+	}
+
+	ep, err = ep.Parse(src)
+	if err != nil {
+		log.Println(err)
+		return ""
+	}
+
+	return ep.String()
 }
 
 func (f flip) getBackCardSet(doc *goquery.Document) string {

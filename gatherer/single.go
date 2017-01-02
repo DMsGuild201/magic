@@ -16,6 +16,7 @@ type single struct{}
 func (s single) Parse(doc *goquery.Document, c *magic.Card) error {
 	c.ID = getCardID(c.URL)
 	c.CardNumber = s.getCardNumber(doc)
+	c.Image = s.getCardImage(doc)
 	c.Names["en"] = s.getCardName(doc)
 	c.Set = s.getCardSet(doc)
 	c.Mana = s.getCardMana(doc)
@@ -40,6 +41,27 @@ func (s single) getCardNumber(doc *goquery.Document) string {
 
 func (s single) getCardName(doc *goquery.Document) string {
 	return strings.TrimSpace(doc.Find("#ctl00_ctl00_ctl00_MainContent_SubContent_SubContent_nameRow .value").Text())
+}
+
+func (s single) getCardImage(doc *goquery.Document) string {
+	src, ok := doc.Find("#ctl00_ctl00_ctl00_MainContent_SubContent_SubContent_leftColumn img").Attr("src")
+	if !ok {
+		return ""
+	}
+
+	ep, err := url.Parse(doc.Url.String())
+	if err != nil {
+		log.Println(err)
+		return ""
+	}
+
+	ep, err = ep.Parse(src)
+	if err != nil {
+		log.Println(err)
+		return ""
+	}
+
+	return ep.String()
 }
 
 func (s single) getCardSet(doc *goquery.Document) string {

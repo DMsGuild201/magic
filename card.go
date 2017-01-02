@@ -3,8 +3,9 @@ package magic
 type Card struct {
 	// this is the multiverseid
 	// taken from Gatherer
-	ID  string `json:"id"`
-	URL string `json:"gatherer_url"`
+	ID    string `json:"id"`
+	URL   string `json:"gatherer_url"`
+	Image string `json:"image"`
 
 	// this is a unique string for
 	// the card in a set

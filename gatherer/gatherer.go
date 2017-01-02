@@ -99,13 +99,7 @@ func (g gatherer) ScrapeSets() ([]*magic.Set, error) {
 }
 
 func (g gatherer) GetCards(set *magic.Set) ([]*magic.Card, error) {
-	rsp, err := g.Get(set.URL)
-	if err != nil {
-		return nil, err
-	}
-	defer rsp.Body.Close()
-
-	doc, err := goquery.NewDocumentFromReader(rsp.Body)
+	doc, err := goquery.NewDocument(set.URL)
 	if err != nil {
 		return nil, err
 	}
@@ -140,13 +134,7 @@ func (g gatherer) GetCards(set *magic.Set) ([]*magic.Card, error) {
 }
 
 func (g gatherer) ScrapeCard(c *magic.Card) error {
-	rsp, err := g.Get(c.URL)
-	if err != nil {
-		return err
-	}
-	defer rsp.Body.Close()
-
-	doc, err := goquery.NewDocumentFromReader(rsp.Body)
+	doc, err := goquery.NewDocument(c.URL)
 	if err != nil {
 		return err
 	}
