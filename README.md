@@ -6,6 +6,8 @@ The project is currently in development. This is NOT a stable API. We're aiming 
 
 Right now we're saving the data in JSON format (sets and cards).
 
+The previous way to parse the card's was to match on css. That wont work. Based on the missing data, the rows wont match up. The new strategy is to index all the rows and their values. Then match on the name of the data. It's a rough draft right now, it will be cleaned up as soon as I don't find anymore issues.
+
 TODOO
 * Image extraction and saving
 -- Support multiple backends (S3, filesystem, etc..)
