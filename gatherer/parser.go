@@ -22,8 +22,8 @@ type CardParser interface {
 // two cards per page
 func getCardParser(doc *goquery.Document) (CardParser, error) {
 	switch doc.Find(".cardComponent").Length() {
-	case 2: // this is a flip card
-		return flip{}, nil
+	// case 2: // this is a flip card
+	// 	return flip{}, nil
 
 	case 0: // this is a normal card
 		return single{}, nil

@@ -21,13 +21,13 @@ type Card struct {
 	// total that the card costs
 	ConvertedManageCost int `json:"converted_mana_cost"`
 
-	Power     int `json:"power"`
-	Toughness int `json:"toughness"`
-	Loyality  int `json:"loyality"`
+	Power     *int `json:"power"`
+	Toughness *int `json:"toughness"`
+	Loyality  *int `json:"loyality"`
 
 	AbilityTexts []string `json:"ability_texts"`
-	FlavorText   string   `json:"flavor_text"`
-	Artist       string   `json:"artist"`
+	FlavorText   *string  `json:"flavor_text"`
+	Artist       *string  `json:"artist"`
 	Rulings      []string `json:"rulings"`
 
 	// some cards have a backside
@@ -36,7 +36,7 @@ type Card struct {
 	Backside *Card `json:"backside,omitempty"`
 }
 
-func (c Card) String() string {
+func (c Card) Name() string {
 	name, ok := c.Names["en"]
 	if !ok {
 		return "unknown name"

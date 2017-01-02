@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/http/cookiejar"
 	"net/url"
+	"strings"
 
 	"github.com/PuerkitoBio/goquery"
 )
@@ -151,4 +152,24 @@ func (g gatherer) ScrapeCard(c *magic.Card) error {
 	}
 
 	return nil
+}
+
+func parseCardColumn(doc *goquery.Document, col string) map[string]*goquery.Selection {
+	data := make(map[string]*goquery.Selection)
+
+	// we grab the goquery.Selection so that some of the fields can have their html
+	// parsed out like mana images.
+	doc.Find(".cardDetails .row").Each(func(i int, s *goquery.Selection) {
+		label := strings.TrimSpace(s.Find(".label").Text())
+		value := s.Find(".value")
+
+		// we couldn't find the data for the card
+		if value == nil {
+			return
+		}
+
+		data[label] = value
+	})
+
+	return data
 }
