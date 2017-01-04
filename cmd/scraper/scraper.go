@@ -4,19 +4,9 @@ import (
 	"log"
 	"magic"
 	"magic/gatherer"
-
-	"github.com/davecgh/go-spew/spew"
 )
 
 func main() {
-	c, e := gatherer.New().ScrapeCard("http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=87600")
-	if e != nil {
-		panic(e)
-	}
-
-	spew.Dump(*c)
-	return
-
 	var (
 		sets  []*magic.Set
 		cards []*magic.Card
@@ -24,7 +14,6 @@ func main() {
 		urls []string
 	)
 
-	loop := 2
 	g := gatherer.New()
 	sets, err := g.ScrapeSets()
 	if err != nil {
@@ -52,11 +41,6 @@ func main() {
 			// append the card to the set too
 			cards = append(cards, card)
 			s.Cards = append(s.Cards, card)
-		}
-
-		loop--
-		if loop == 0 {
-			break
 		}
 	}
 
