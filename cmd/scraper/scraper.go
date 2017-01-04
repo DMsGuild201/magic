@@ -9,11 +9,7 @@ import (
 )
 
 func main() {
-	c := &magic.Card{
-		URL:   "http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=955",
-		Names: make(map[string]string),
-	}
-	e := gatherer.New().ScrapeCard(c)
+	c, e := gatherer.New().ScrapeCard("http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=87600")
 	if e != nil {
 		panic(e)
 	}
@@ -24,8 +20,11 @@ func main() {
 	var (
 		sets  []*magic.Set
 		cards []*magic.Card
+
+		urls []string
 	)
 
+	loop := 2
 	g := gatherer.New()
 	sets, err := g.ScrapeSets()
 	if err != nil {
@@ -33,29 +32,30 @@ func main() {
 	}
 
 	log.Println("found", len(sets))
-	counter := 5
 	for _, s := range sets {
 		log.Println("processing set", s)
 
-		if cards, err = g.GetCards(s); err != nil {
+		if urls, err = g.GetCards(s); err != nil {
 			log.Println(err)
 			continue
 		}
 
-		for _, card := range cards {
-			if err = g.ScrapeCard(card); err != nil {
+		for _, u := range urls {
+			card, err := g.ScrapeCard(u)
+			if err != nil {
 				log.Println(err)
 				continue
 			}
 
-			log.Println("scraped", card, card.URL)
+			// log.Println("scraped", card, card.URL)
 
 			// append the card to the set too
+			cards = append(cards, card)
 			s.Cards = append(s.Cards, card)
 		}
 
-		counter--
-		if counter == 0 {
+		loop--
+		if loop == 0 {
 			break
 		}
 	}

@@ -14,16 +14,15 @@ type Card struct {
 	Names      map[string]string `json:"names"`
 	Set        string            `json:"set"`
 	Mana       string            `json:"mana"`
-	Color      string            `json:"color"`
 	Type       string            `json:"type"`
 	Rarity     string            `json:"rarity"`
 
 	// total that the card costs
 	ConvertedManageCost int `json:"converted_mana_cost"`
 
-	Power     *int `json:"power"`
-	Toughness *int `json:"toughness"`
-	Loyality  *int `json:"loyality"`
+	Power     string `json:"power"`
+	Toughness string `json:"toughness"`
+	Loyality  *int   `json:"loyality"`
 
 	AbilityTexts []string `json:"ability_texts"`
 	FlavorText   *string  `json:"flavor_text"`
@@ -34,6 +33,12 @@ type Card struct {
 	// we need to represent this
 	// see Westvale Abbey
 	Backside *Card `json:"backside,omitempty"`
+}
+
+func NewCard() *Card {
+	return &Card{
+		Names: make(map[string]string),
+	}
 }
 
 func (c Card) Name() string {

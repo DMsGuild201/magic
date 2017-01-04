@@ -7,7 +7,6 @@ import (
 	"net/http"
 	"net/http/cookiejar"
 	"net/url"
-	"strings"
 
 	"github.com/PuerkitoBio/goquery"
 )
@@ -18,8 +17,8 @@ var (
 
 type Service interface {
 	SetList() ([]*magic.Set, error)
-	GetCards(*magic.Set) ([]*magic.Card, error)
-	ScrapeCard(*magic.Card) error
+	GetCards(*magic.Set) ([]string, error)
+	ScrapeCard(string) (*magic.Card, error)
 }
 
 type gatherer struct {
@@ -99,13 +98,14 @@ func (g gatherer) ScrapeSets() ([]*magic.Set, error) {
 	return sets, nil
 }
 
-func (g gatherer) GetCards(set *magic.Set) ([]*magic.Card, error) {
+func (g gatherer) GetCards(set *magic.Set) ([]string, error) {
+	var cards []string
+
 	doc, err := goquery.NewDocument(set.URL)
 	if err != nil {
-		return nil, err
+		return cards, err
 	}
 
-	var cards []*magic.Card
 	doc.Find(".middleCol a").Each(func(i int, s *goquery.Selection) {
 		href, ok := s.Attr("href")
 		if !ok {
@@ -125,51 +125,24 @@ func (g gatherer) GetCards(set *magic.Set) ([]*magic.Card, error) {
 			return
 		}
 
-		cards = append(cards, &magic.Card{
-			Names: make(map[string]string),
-			URL:   u.String(),
-		})
+		cards = append(cards, u.String())
 	})
 
 	return cards, nil
 }
 
-func (g gatherer) ScrapeCard(c *magic.Card) error {
-	doc, err := goquery.NewDocument(c.URL)
+func (g gatherer) ScrapeCard(u string) (*magic.Card, error) {
+	doc, err := goquery.NewDocument(u)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	// detect the card parser
 	// flip card, normal card
 	p, err := getCardParser(doc)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	if err := p.Parse(doc, c); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func parseCardColumn(doc *goquery.Document, col string) map[string]*goquery.Selection {
-	data := make(map[string]*goquery.Selection)
-
-	// we grab the goquery.Selection so that some of the fields can have their html
-	// parsed out like mana images.
-	doc.Find(".cardDetails .row").Each(func(i int, s *goquery.Selection) {
-		label := strings.TrimSpace(s.Find(".label").Text())
-		value := s.Find(".value")
-
-		// we couldn't find the data for the card
-		if value == nil {
-			return
-		}
-
-		data[label] = value
-	})
-
-	return data
+	return p.Parse(doc)
 }

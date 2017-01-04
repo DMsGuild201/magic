@@ -2,9 +2,7 @@ package gatherer
 
 import (
 	"errors"
-	"log"
 	"magic"
-	"net/url"
 
 	"github.com/PuerkitoBio/goquery"
 )
@@ -14,7 +12,7 @@ var (
 )
 
 type CardParser interface {
-	Parse(doc *goquery.Document, c *magic.Card) error
+	Parse(doc *goquery.Document) (*magic.Card, error)
 }
 
 // detect if we have special card cases
@@ -22,24 +20,13 @@ type CardParser interface {
 // two cards per page
 func getCardParser(doc *goquery.Document) (CardParser, error) {
 	switch doc.Find(".cardComponent").Length() {
-	// case 2: // this is a flip card
-	// 	return flip{}, nil
+	case 2: // this is a flip card
+		return NewFlip(), nil
 
 	case 0: // this is a normal card
-		return single{}, nil
+		return NewSingle(), nil
 
 	default:
 		return nil, ErrNoParserFound
 	}
-}
-
-func getCardID(cu string) string {
-	u, err := url.Parse(cu)
-	if err != nil {
-		log.Println(err)
-
-		return ""
-	}
-
-	return u.Query().Get("multiverseid")
 }
